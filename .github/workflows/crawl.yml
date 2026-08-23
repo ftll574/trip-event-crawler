@@ -1,0 +1,66 @@
+name: crawl
+
+# 排程爬蟲（依【02】§4）：cron 避開整點（17,47）降低延遲。
+# 每輪：抓 deals hub → 解析活動頁 → 變更偵測 → commit data/events.json
+#      → 有 NEW/MODIFIED 時 broadcast Flex 卡 → ping healthchecks.io。
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+    inputs:
+      markets:
+        description: "市場代碼（逗號分隔，空＝預設 tw）"
+        default: "tw"
+
+concurrency:
+  group: crawl
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TRIPBOT_MARKETS: ${{ github.event.inputs.markets || 'tw' }}
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      NTFY_TOPIC_URL: ${{ secrets.NTFY_TOPIC_URL }}
+      HEALTHCHECKS_URL: ${{ secrets.HEALTHCHECKS_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install httpx beautifulsoup4 lxml tenacity cryptography tzdata
+
+      - name: Smoke — hub reachable
+        run: |
+          python - <<'PY'
+          from tripbot.fetch import fetch
+          r = fetch("https://tw.trip.com/sale/deals/")
+          print("status:", r.status_code, "len:", len(r.text))
+          assert r.status_code == 200
+          PY
+
+      - name: Crawl & detect
+        run: python -m tripbot.run_crawl --markets "$TRIPBOT_MARKETS"
+
+      - name: Commit published data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(data): crawl update [skip ci]"
+          file_pattern: "data/events.json"
+
+      - name: Upload sqlite for debugging
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: events-sqlite
+          path: data/events.sqlite*
+          retention-days: 7

@@ -1,0 +1,23 @@
+name: keepalive
+
+# 【02】§4 / R5：public repo 的 scheduled workflow 連續 60 天無活動會被停用。
+# 每週一次空 commit 保活（同時觸發 Vercel redeploy 無害）。
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # 週一 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empty commit
+        run: |
+          git config user.name "keepalive-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keepalive scheduled tasks [skip ci]"
+          git push

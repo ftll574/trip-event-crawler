@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# 本地資料（repo 內只提交 data/events.json 與加密訂閱）
+data/events.sqlite*
+data/*.sqlite-wal
+data/*.sqlite-shm
+.tmp-research/
+research/_src/
+.agent-teams/
+
+.env

@@ -1,0 +1,41 @@
+name: subs
+
+# Vercel webhook 以 repository_dispatch 送來加密訂閱變更；
+# 本 workflow 解密、合併、重新加密並 commit（公開 repo 不出現 LINE userId 明文）。
+on:
+  repository_dispatch:
+    types: [sub-update]
+
+concurrency:
+  group: subs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install crypto dep only
+        run: pip install cryptography
+
+      - name: Apply subscription update
+        env:
+          SUBS_FERNET_KEY: ${{ secrets.SUBS_FERNET_KEY }}
+          BLOB: ${{ github.event.client_payload.blob }}
+        run: |
+          python -m tripbot.subs apply --blob "$BLOB" --path data/subscriptions.enc
+
+      - name: Commit encrypted subscriptions
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(subs): update [skip ci]"
+          file_pattern: "data/subscriptions.enc"

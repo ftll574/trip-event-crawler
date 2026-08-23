@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><title>okinawapromotion - Trip.com</title></head>
+<body>
+<!-- 合成 fixture：結構依【01】§1.3 一手實證的 __foxpage_data__ schema -->
+<script id="__foxpage_data__" type="application/json">
+{
+  "page": {"id": "pg_okinawa"},
+  "modules": [{"name": "campaign", "version": "1.0"}],
+  "structures": [
+    {
+      "id": "n1",
+      "name": "cloud-component-timer",
+      "structure": {"label": "倒數計時"},
+      "props": {
+        "startTime": 1762152000000,
+        "endTimeNew": 1762756800000,
+        "endTimeZone": "GMT+08:00"
+      }
+    },
+    {
+      "id": "n2",
+      "name": "@ctrip/cloud-component-sales4-coupon-b",
+      "structure": {"label": "優惠券"},
+      "props": {
+        "title": {"text": "沖繩酒店限時 85 折"},
+        "prizeType": "折扣 15% OFF",
+        "playIds": ["play_001", "play_002"],
+        "txtOutOfStock": "今日名額已搶完，明天 12:00 補貨",
+        "stockTip": "限量 500 組"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "terms-rich-text",
+      "structure": {"label": "活動辦法"},
+      "props": {
+        "terms": "活動時間以頁面顯示為準；優惠適用指定星級酒店，每人每房限用一次。詳情見活動頁。"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "tab-switcher",
+      "props": {"dateTabSwitchTime": 86400000}
+    }
+  ]
+}
+</script>
+</body></html>
