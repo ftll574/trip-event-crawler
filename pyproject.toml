@@ -49,3 +49,5 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# 讓裸 `pytest`（CI）與 `python -m pytest`（本地）行為一致：repo 根目錄進 sys.path
+pythonpath = ["."]

@@ -16,3 +16,5 @@ research/_src/
 .agent-teams/
 
 .env
+
+.secrets.local.txt
